@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mindiqo.backend.mapper.PostMapper">
+
+    <resultMap id="postNoteResultMap" type="com.mindiqo.backend.entity.PostNote">
+        <id property="id" column="id"/>
+        <result property="noteId" column="note_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="abs" column="abs"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="img" column="img"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <association property="creator" javaType="com.mindiqo.backend.entity.User">
+            <id property="id" column="user_id"/>
+            <result property="username" column="username"/>
+            <result property="avatar" column="avatar"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="postNoteWithTagsResultMap" type="com.mindiqo.backend.entity.PostNote">
+        <id property="id" column="id"/>
+        <result property="noteId" column="note_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="abs" column="abs"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="img" column="img"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <association property="creator" javaType="com.mindiqo.backend.entity.User">
+            <id property="id" column="user_id"/>
+            <result property="username" column="username"/>
+            <result property="avatar" column="avatar"/>
+        </association>
+        <collection property="tags" ofType="com.mindiqo.backend.entity.Tag" select="getTagsByPostId" column="id"/>
+    </resultMap>
+    <select id="getTagsByPostId" resultType="com.mindiqo.backend.entity.Tag">
+        SELECT id, tag_name
+        FROM tag_table
+        WHERE id IN (SELECT tag_id FROM note_tag WHERE post_note_id = #{id})
+    </select>
+
+    <select id="getAll" resultType="com.mindiqo.backend.entity.PostNote">
+        select id,
+               note_id,
+               user_id,
+               title,
+               create_time,
+               update_time,
+               abs,
+               img
+        from post_note_table
+        order by create_time desc
+
+    </select>
+
+    <update id="incrementViewCount">
+        UPDATE post_note_table
+        SET view_count = view_count + 1
+        WHERE id = #{id}
+    </update>
+    <select id="getById" resultMap="postNoteWithTagsResultMap">
+        SELECT pn.id,
+               pn.note_id,
+               pn.user_id,
+               pn.title,
+               pn.content,
+               pn.abs,
+               pn.create_time,
+               pn.update_time,
+               pn.img,
+               pn.view_count,
+               u.username,
+               u.avatar,
+               (SELECT COUNT(1) FROM like_table lt WHERE lt.post_id = pn.id)    as like_count,
+               (SELECT COUNT(1) FROM comment_table ct WHERE ct.post_id = pn.id) as comment_count
+        FROM post_note_table pn
+                 JOIN user_table u ON pn.user_id = u.id
+        where pn.id = #{id}
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        insert into post_note_table (note_id, user_id, content, title, create_time, update_time, abs, img)
+            value (#{noteId}, #{userId}, #{content}, #{title}, #{createTime}, #{updateTime}, #{abs}, #{img})
+    </insert>
+
+    <insert id="addTagToPostById">
+        INSERT INTO note_tag (tag_id, post_note_id)
+        values (#{tag.id}, #{postNoteId})
+    </insert>
+
+    <select id="getUserPosts" resultType="com.mindiqo.backend.entity.PostNote">
+        select id,
+               note_id,
+               user_id,
+               title,
+               create_time,
+               update_time,
+               abs,
+               img
+        from post_note_table
+        where user_id = #{id}
+        order by create_time desc
+    </select>
+
+    <delete id="delete">
+        delete
+        from post_note_table
+        where id = #{id}
+          and user_id = #{userId}
+    </delete>
+
+    <select id="getPostsOrderedByView" resultMap="postNoteResultMap">
+        SELECT pn.id,
+               pn.note_id,
+               pn.user_id,
+               pn.title,
+               pn.abs,
+               pn.create_time,
+               pn.update_time,
+               pn.img,
+               pn.view_count,
+               u.username,
+               u.avatar,
+               (SELECT COUNT(*) FROM like_table lt WHERE lt.post_id = pn.id)    as like_count,
+               (SELECT COUNT(*) FROM comment_table ct WHERE ct.post_id = pn.id) as comment_count
+        FROM post_note_table pn
+                 JOIN user_table u ON pn.user_id = u.id
+        ORDER BY pn.view_count DESC, pn.create_time DESC
+    </select>
+    <select id="getPostsOrderedByLiked" resultMap="postNoteResultMap">
+        SELECT pn.id,
+               pn.note_id,
+               pn.user_id,
+               pn.title,
+               pn.abs,
+               pn.create_time,
+               pn.update_time,
+               pn.img,
+               pn.view_count,
+               u.username,
+               u.avatar,
+               (SELECT COUNT(*) FROM like_table lt WHERE lt.post_id = pn.id)    as like_count,
+               (SELECT COUNT(*) FROM comment_table ct WHERE ct.post_id = pn.id) as comment_count
+        FROM post_note_table pn
+                 JOIN user_table u ON pn.user_id = u.id
+        ORDER BY like_count DESC, pn.create_time DESC
+    </select>
+    <select id="getPostsOrderedByCreateTime" resultMap="postNoteResultMap">
+        SELECT pn.id,
+               pn.note_id,
+               pn.user_id,
+               pn.title,
+               pn.abs,
+               pn.create_time,
+               pn.update_time,
+               pn.img,
+               pn.view_count,
+               u.username,
+               u.avatar,
+               (SELECT COUNT(*) FROM like_table lt WHERE lt.post_id = pn.id)    as like_count,
+               (SELECT COUNT(*) FROM comment_table ct WHERE ct.post_id = pn.id) as comment_count
+        FROM post_note_table pn
+                 JOIN user_table u ON pn.user_id = u.id
+        ORDER BY pn.create_time DESC
+    </select>
+    <select id="search" resultMap="postNoteResultMap">
+        SELECT pn.id,
+        pn.note_id,
+        pn.user_id,
+        pn.title,
+        pn.abs,
+        pn.create_time,
+        pn.update_time,
+        pn.img,
+        pn.view_count,
+        u.username,
+        u.avatar,
+        (SELECT COUNT(*) FROM like_table lt WHERE lt.post_id = pn.id) as like_count,
+        (SELECT COUNT(*) FROM comment_table ct WHERE ct.post_id = pn.id) as comment_count
+        FROM post_note_table pn
+        JOIN user_table u ON pn.user_id = u.id
+        <where>
+            <if test="title != null and title != ''">
+                pn.title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="content != null and content != ''">
+                AND pn.content LIKE CONCAT('%', #{content}, '%')
+            </if>
+            <if test="tagName != null and tagName != ''">
+                AND pn.id IN (SELECT post_note_id FROM note_tag WHERE tag_id IN ( SELECT id FROM tag_table WHERE
+                tag_name LIKE CONCAT('%', #{tagName}, '%')))
+            </if>
+        </where>
+        ORDER BY pn.create_time DESC
+    </select>
+    <select id="getTags" resultType="com.mindiqo.backend.entity.Tag">
+        SELECT t.id, t.tag_name
+        FROM tag_table t
+                 JOIN (SELECT tag_id, COUNT(*) as cnt
+                       FROM note_tag
+                       GROUP BY tag_id) nt ON t.id = nt.tag_id
+        ORDER BY nt.cnt DESC
+    </select>
+
+</mapper>

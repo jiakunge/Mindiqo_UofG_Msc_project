@@ -1,0 +1,35 @@
+@startuml
+
+class AuthInterceptor {
+    +preHandle(HttpServletRequest, HttpServletResponse, Object): boolean
+    +postHandle(HttpServletRequest, HttpServletResponse, Object, ModelAndView): void
+    +afterCompletion(HttpServletRequest, HttpServletResponse, Object, Exception): void
+    -sendErrorResponse(HttpServletResponse, String): void
+}
+
+class JwtUtils {
+    {static} -signKey: String
+    {static} -expire: Long
+    {static} +generateJwt(Map<String, Object>): String
+    {static} +parseJWT(String): Claims
+    {static} +isTokenExpired(Claims): boolean
+}
+
+class HttpServletRequest {
+    +getHeader(headerName: String): String
+}
+
+class HttpServletResponse {
+    +setContentType(contentType: String): void
+    +getWriter(): Writer
+}
+
+
+
+
+AuthInterceptor --> JwtUtils: "Uses to validate JWT"
+AuthInterceptor --> HttpServletRequest: "Intercepts and checks token"
+AuthInterceptor --> HttpServletResponse: "May send error response"
+
+
+@enduml

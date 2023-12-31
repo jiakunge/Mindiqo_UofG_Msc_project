@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mindiqo.backend.mapper.NoteMapper">
+    <select id="getAll" resultType="com.mindiqo.backend.entity.Note">
+        SELECT id, creator_id, title, create_time, update_time, abs, img
+        FROM note_table
+        WHERE creator_id = #{userId}
+    </select>
+
+    <update id="updateTitleById">
+        update note_table
+        set title       = #{title},
+            update_time = #{updateTime}
+        where id = #{id} and creator_id = #{creatorId}
+    </update>
+
+    <update id="updateAbsById">
+        update note_table
+        set abs         = #{abs},
+            update_time = #{updateTime}
+        where id = #{id} and creator_id = #{creatorId}
+    </update>
+
+    <update id="updateImgById">
+        update note_table
+        set img         = #{img},
+            update_time = #{updateTime}
+        where id = #{id} and creator_id = #{creatorId}
+
+    </update>
+
+    <delete id="deleteById">
+        delete
+        from note_table
+        where id = #{id} and creator_id = #{userId}
+    </delete>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id"> ## primary key will fill in the id field of note object
+    insert into note_table(creator_id, title, create_time, update_time, abs, img)
+    values (#{creatorId}, #{title}, #{createTime}, #{updateTime}, #{abs}, #{img})
+    </insert>
+
+    <select id="getById" resultType="com.mindiqo.backend.entity.Note">
+        select id, creator_id, title, content, create_time, update_time, abs, img
+        from note_table
+        where id = #{id} and creator_id = #{userId}
+    </select>
+
+    <insert id="addTagToNoteById">
+        INSERT INTO note_tag (tag_id, note_id)
+        SELECT tag_table.id, #{noteId}
+        FROM tag_table
+        WHERE tag_table.tag_name = #{tag.tagName};
+
+    </insert>
+
+    <delete id="removeTagFromNoteById">
+        DELETE
+        FROM note_tag
+        WHERE note_id = #{noteId}
+          AND tag_id = (SELECT id
+                        FROM tag_table
+                        WHERE tag_name = #{tag.tagName});
+    </delete>
+
+    <update id="updateContentById">
+        UPDATE note_table
+        SET content = #{content},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

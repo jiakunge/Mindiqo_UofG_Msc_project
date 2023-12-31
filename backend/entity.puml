@@ -1,0 +1,91 @@
+@startuml
+class com.mindiqo.backend.entity.Like {
+~ Integer id
+~ Integer postId
+~ Integer userId
+~ LocalDateTime createTime
+}
+class com.mindiqo.backend.entity.PostNote {
+- {static} long serialVersionUID
+- Integer id
+- Integer noteId
+- Integer userId
+- String title
+- String abs
+- String content
+- LocalDateTime createTime
+- LocalDateTime updateTime
+- String img
+- User creator
+- List<Tag> tags
+- Integer likeCount
+- Integer commentCount
+- Integer viewCount
+}
+class com.mindiqo.backend.entity.Comment {
+- Integer id
+- Integer postId
+- Integer userId
+- String content
+- LocalDateTime createTime
+- User user
+}
+class com.mindiqo.backend.entity.PageBean {
+- {static} long serialVersionUID
+- Long total
+- List rows
+}
+class com.mindiqo.backend.entity.Notification {
+- Integer id
+- Integer senderId
+- Integer receiverId
+- String content
+- Integer type
+- Integer relatedPostId
+- Integer status
+- LocalDateTime createTime
+- User sender
+}
+class com.mindiqo.backend.entity.User {
+- {static} long serialVersionUID
+- Integer id
+- String username
+- String password
+- String email
+- String avatar
+- LocalDateTime createTime
+- LocalDateTime updateTime
+- String bio
+- String bgImg
+}
+class com.mindiqo.backend.entity.Result {
+- Integer code
+- String msg
+- Object data
++ {static} Result success()
++ {static} Result success(Object)
++ {static} Result error(String)
+}
+class com.mindiqo.backend.entity.Note {
+~ Integer id
+~ String title
+~ Integer creatorId
+~ String content
+~ String abs
+~ LocalDateTime createTime
+~ LocalDateTime updateTime
+~ List<Tag> tags
+~ String img
+}
+class com.mindiqo.backend.entity.Tag {
+- {static} long serialVersionUID
+- Integer id
+- String tagName
+}
+
+
+java.io.Serializable <|.. com.mindiqo.backend.entity.PostNote
+java.io.Serializable <|.. com.mindiqo.backend.entity.PageBean
+java.io.Serializable <|.. com.mindiqo.backend.entity.User
+java.io.Serializable <|.. com.mindiqo.backend.entity.Tag
+@enduml

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mindiqo.backend.mapper.NotificationMapper">
+
+    <resultMap id="notificationResultMap" type="com.mindiqo.backend.entity.Notification">
+        <id property="id" column="id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="content" column="content"/>
+        <result property="type" column="type"/>
+        <result property="relatedPostId" column="related_post_id"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <association property="sender" javaType="com.mindiqo.backend.entity.User">
+            <id property="id" column="sender_id"/>
+            <result property="username" column="username"/>
+            <result property="avatar" column="avatar"/>
+        </association>
+
+    </resultMap>
+    <select id="getUnread" resultMap="com.mindiqo.backend.mapper.NotificationMapper.notificationResultMap">
+        select nt.id,
+               nt.sender_id,
+               nt.content,
+               nt.type,
+               nt.related_post_id,
+               nt.create_time,
+               u.username,
+               u.avatar
+        from notification_table nt
+                 join user_table u on nt.sender_id = u.id
+        where nt.receiver_id = #{userId}
+          and status = 0
+        order by nt.create_time desc
+    </select>
+    <select id="getRead" resultMap="com.mindiqo.backend.mapper.NotificationMapper.notificationResultMap">
+        select nt.id,
+               nt.sender_id,
+               nt.content,
+               nt.type,
+               nt.related_post_id,
+               nt.create_time,
+               u.username,
+               u.avatar
+        from notification_table nt
+                 join user_table u on nt.sender_id = u.id
+        where nt.receiver_id = #{userId}
+          and status = 1
+        order by nt.create_time desc
+    </select>
+    <update id="readANotification">
+        update notification_table
+        set status = 1
+        where id = #{id}
+          and receiver_id = #{receiverId}
+    </update>
+    <delete id="deleteById">
+        delete
+        from notification_table
+        where id = #{id}
+          and receiver_id = #{receiverId}
+    </delete>
+    <select id="getUnreadCount" resultType="java.lang.Integer">
+        select count(1)
+        from notification_table
+        where receiver_id = #{userId}
+          and status = 0
+    </select>
+    <insert id="addLikeNotification">
+        insert into notification_table(sender_id, receiver_id, content, type, related_post_id, status, create_time)
+        values (#{senderId},
+                (select user_id from post_note_table where id = #{relatedPostId})
+                   , #{content}, #{type}, #{relatedPostId}, #{status}, #{createTime})
+    </insert>
+    <insert id="addCommentNotification">
+        insert into notification_table(sender_id, receiver_id, content, type, related_post_id, status, create_time)
+        values (#{senderId},
+                (select user_id from post_note_table where id = #{relatedPostId})
+                   , #{content}, #{type}, #{relatedPostId}, #{status}, #{createTime})
+    </insert>
+</mapper>

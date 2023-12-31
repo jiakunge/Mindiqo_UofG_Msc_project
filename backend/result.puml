@@ -1,0 +1,26 @@
+@startuml
+
+participant "Frontend" as F
+participant "Controller" as C
+participant "Service" as S
+participant "Result" as R
+
+F -> C : Request
+activate C
+
+C -> S : ProcessRequest()
+activate S
+
+S --> C : ResultData
+deactivate S
+
+C -> R : new Result(ResultData)
+activate R
+R --> C : FormattedResult
+deactivate R
+
+C --> F : FormattedResult
+
+deactivate C
+
+@enduml

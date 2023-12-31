@@ -1,0 +1,42 @@
+@startuml
+actor User
+participant "Frontend App" as Frontend
+participant "PostController" as Controller
+participant "PostService" as Service
+participant "PostServiceImpl" as ServiceImpl
+participant "Redis" as Redis
+database "Database" as Database
+
+User -> Frontend: Interact
+activate Frontend
+
+Frontend -> Controller: Request
+activate Controller
+
+Controller -> Service: Call service methods
+activate Service
+
+Service -> Redis: Check cache
+activate Redis
+Redis --> Service: Cached data
+deactivate Redis
+
+Service -> Database: Query database
+activate Database
+Database --> Service: Query result
+deactivate Database
+
+Service -> Redis: Cache query result
+activate Redis
+Redis --> Service: Cache updated
+deactivate Redis
+
+Service --> Controller: Return response
+deactivate Service
+
+Controller --> Frontend: Response
+deactivate Controller
+
+Frontend --> User: Display response
+deactivate Frontend
+@enduml

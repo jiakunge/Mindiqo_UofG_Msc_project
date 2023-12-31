@@ -1,0 +1,367 @@
+@startuml
+class com.mindiqo.backend.entity.Like {
+~ Integer id
+~ Integer postId
+~ Integer userId
+~ LocalDateTime createTime
+}
+interface com.mindiqo.backend.mapper.NoteMapper {
++ List<Note> getAll(Integer)
++ void updateTitleById(Note)
++ void updateAbsById(Note)
++ void updateImgById(Note)
++ void deleteById(Integer,Integer)
++ void add(Note)
++ Note getById(Integer,Integer)
++ void addTagToNoteById(Integer,Tag)
++ void removeTagFromNoteById(Integer,Tag)
++ void updateContentById(Note)
+}
+class com.mindiqo.backend.entity.PageBean {
+- {static} long serialVersionUID
+- Long total
+- List rows
+}
+interface com.mindiqo.backend.service.NotificationService {
+~ List<Notification> getUnread(Integer)
+~ List<Notification> getRead(Integer)
+~ void readANotification(Notification)
+~ void deleteById(Notification)
+~ Integer getUnreadCount(Integer)
+~ void sendLikeNotification(Like)
+~ void sendCommentNotification(Comment)
+}
+class com.mindiqo.backend.service.impl.LikeServiceImpl {
+~ LikeMapper likeMapper
++ void like(Like)
++ void unlike(Like)
++ Integer getLikes(Integer)
++ Boolean isLiked(Like)
+}
+interface com.mindiqo.backend.service.LikeService {
+~ void like(Like)
+~ void unlike(Like)
+~ Integer getLikes(Integer)
+~ Boolean isLiked(Like)
+}
+class com.mindiqo.backend.BackendApplication {
++ {static} void main(String[])
+}
+class com.mindiqo.backend.controller.NotificationController {
+- NotificationService notificationService
++ Result getUnreadNotifications(Integer)
++ Result getReadNotifications(Integer)
++ Result readANotification(Integer,Notification)
++ Result delete(Integer,Integer)
++ Result getUnreadCount(Integer)
+}
+class com.mindiqo.backend.entity.Tag {
+- {static} long serialVersionUID
+- Integer id
+- String tagName
+}
+class com.mindiqo.backend.controller.NoteController {
+- TagService tagService
+- NoteService noteService
++ Result getAllTags()
++ Result getAllNotes(Integer)
++ Result renameNote(Note,Integer,Integer)
++ Result editAbs(Note,Integer,Integer)
++ Result changeImg(Note,Integer,Integer)
++ Result delete(Integer,Integer)
++ Result add(Note,Integer)
++ Result getNoteById(Integer,Integer)
++ Result addTagToNoteById(Integer,Tag,Integer)
++ Result removeTagFromNoteById(Integer,Tag,Integer)
++ Result addTag(Tag)
++ Result saveNote(Integer,Note,Integer)
++ Result publicNote(Integer,Note,Integer)
+}
+class com.mindiqo.backend.controller.AuthController {
+- AuthService authService
++ Result login(User)
++ Result register(User)
++ Result resetPassword(User)
+}
+class com.mindiqo.backend.entity.PostNote {
+- {static} long serialVersionUID
+- Integer id
+- Integer noteId
+- Integer userId
+- String title
+- String abs
+- String content
+- LocalDateTime createTime
+- LocalDateTime updateTime
+- String img
+- User creator
+- List<Tag> tags
+- Integer likeCount
+- Integer commentCount
+- Integer viewCount
+}
+interface com.mindiqo.backend.mapper.PostMapper {
++ List<PostNote> getAll()
++ PostNote getById(Integer)
++ void add(PostNote)
++ void addTagToPostById(Integer,Tag)
+~ List<PostNote> getUserPosts(User)
+~ void delete(PostNote)
+~ void incrementViewCount(Integer)
+~ List<PostNote> getPostsOrderedByView()
+~ List<PostNote> getPostsOrderedByLiked()
+~ List<PostNote> getPostsOrderedByCreateTime()
+~ List<PostNote> search(String,String,String)
+~ List<Tag> getTags()
+}
+class com.mindiqo.backend.config.WebConfig {
+- AuthInterceptor authInterceptor
++ void addInterceptors(org.springframework.web.servlet.config.annotation.InterceptorRegistry)
+}
+class com.mindiqo.backend.entity.Notification {
+- Integer id
+- Integer senderId
+- Integer receiverId
+- String content
+- Integer type
+- Integer relatedPostId
+- Integer status
+- LocalDateTime createTime
+- User sender
+}
+class com.mindiqo.backend.entity.User {
+- {static} long serialVersionUID
+- Integer id
+- String username
+- String password
+- String email
+- String avatar
+- LocalDateTime createTime
+- LocalDateTime updateTime
+- String bio
+- String bgImg
+}
+class com.mindiqo.backend.service.impl.NotificationServiceImpl {
+~ NotificationMapper notificationMapper
++ List<Notification> getUnread(Integer)
++ List<Notification> getRead(Integer)
++ void readANotification(Notification)
++ void deleteById(Notification)
++ Integer getUnreadCount(Integer)
++ void sendLikeNotification(Like)
++ void sendCommentNotification(Comment)
+}
+interface com.mindiqo.backend.service.AuthService {
+~ User login(User)
+~ boolean register(User)
+~ void resetPassword(User)
+~ User getUser(User)
+~ List<PostNote> getUserPosts(User)
+~ void updateUser(User)
+}
+class com.mindiqo.backend.controller.CommentController {
+- CommentService commentService
+- NotificationService notificationService
++ Result getComments(Integer)
++ Result comment(Comment,Integer)
+}
+interface com.mindiqo.backend.mapper.CommentMapper {
+~ List<Comment> getComments(Integer)
+~ Integer getCommentCount(Integer)
+~ void add(Comment)
+}
+class com.mindiqo.backend.exception.GlobalExceptionHandler {
++ Result handleException(Exception)
+}
+class com.mindiqo.backend.service.impl.PostServiceImpl {
+~ PostMapper postMapper
+- RedisTemplate redisTemplate
++ List<PostNote> getAll()
++ PostNote getById(Integer)
++ void delete(PostNote)
++ PageBean getMostViewed(Integer,Integer)
++ PageBean getMostLiked(Integer,Integer)
++ PageBean getRecent(Integer,Integer)
++ PageBean search(Integer,Integer,String,String,String)
++ PageBean getTags(Integer,Integer)
+}
+class com.mindiqo.backend.interceptor.AuthInterceptor {
++ boolean preHandle(HttpServletRequest,HttpServletResponse,Object)
++ void postHandle(HttpServletRequest,HttpServletResponse,Object,ModelAndView)
++ void afterCompletion(HttpServletRequest,HttpServletResponse,Object,Exception)
+- void sendErrorResponse(HttpServletResponse,String)
+}
+interface com.mindiqo.backend.mapper.LikeMapper {
+~ void add(Like)
+~ void delete(Like)
+~ Integer getLikes(Integer)
+~ Like getLike(Like)
+}
+interface com.mindiqo.backend.service.NoteService {
+~ Map<String,Object> getAll(Integer)
+~ void updateTitle(Note)
+~ void updateAbs(Note)
+~ void updateImg(Note)
+~ void deleteById(Integer,Integer)
+~ Note add(Note)
+~ Note getById(Integer,Integer)
+~ void addTagToNoteById(Integer,Tag)
+~ void removeTagFromNoteById(Integer,Tag)
+~ void saveNote(Note)
+~ void post(Note)
+}
+class com.mindiqo.backend.service.impl.AuthServiceImpl {
+- AuthMapper authMapper
+- PostMapper postMapper
++ User login(User)
++ boolean register(User)
++ void resetPassword(User)
++ User getUser(User)
++ List<PostNote> getUserPosts(User)
++ void updateUser(User)
+}
+class com.mindiqo.backend.entity.Comment {
+- Integer id
+- Integer postId
+- Integer userId
+- String content
+- LocalDateTime createTime
+- User user
+}
+interface com.mindiqo.backend.service.CommentService {
+~ List<Comment> getComments(Integer)
+~ Integer getCommentCount(Integer)
+~ void comment(Comment)
+}
+class com.mindiqo.backend.service.impl.CommentServiceImpl {
+~ CommentMapper commentMapper
+~ AuthMapper userMapper
++ List<Comment> getComments(Integer)
++ Integer getCommentCount(Integer)
++ void comment(Comment)
+}
+class com.mindiqo.backend.controller.UserController {
+- AuthService userService
++ Result getUser(String)
++ Result getUserPosts(User)
++ Result updateUser(User,Integer)
+}
+interface com.mindiqo.backend.mapper.AuthMapper {
++ User login(User)
++ void insertUser(User)
++ void updatePassword(User)
++ User getBasicInfoById(Integer)
+~ User getUser(User)
+~ void updateUser(User)
+}
+class com.mindiqo.backend.entity.Result {
+- Integer code
+- String msg
+- Object data
++ {static} Result success()
++ {static} Result success(Object)
++ {static} Result error(String)
+}
+interface com.mindiqo.backend.mapper.TagMapper {
++ List<Tag> getAll()
++ List<Tag> getByNote(Note)
++ void insert(Tag)
++ List<Tag> getTagsByPost(PostNote)
+}
+class com.mindiqo.backend.service.impl.TagServiceImpl {
+- TagMapper tagMapper
++ List<Tag> getAll()
++ void add(Tag)
+}
+class com.mindiqo.backend.entity.Note {
+~ Integer id
+~ String title
+~ Integer creatorId
+~ String content
+~ String abs
+~ LocalDateTime createTime
+~ LocalDateTime updateTime
+~ List<Tag> tags
+~ String img
+}
+class com.mindiqo.backend.controller.LikeController {
+- LikeService likeService
+- NotificationService notificationService
++ Result like(Integer,Integer)
++ Result unlike(Integer,Integer)
++ Result getLikes(Integer)
++ Result isLiked(Integer,Integer)
+}
+class com.mindiqo.backend.service.impl.NoteServiceImpl {
+~ NoteMapper noteMapper
+~ TagMapper tagMapper
+~ PostMapper postMapper
++ Map<String,Object> getAll(Integer)
++ void updateTitle(Note)
++ void updateAbs(Note)
++ void updateImg(Note)
++ void deleteById(Integer,Integer)
++ Note add(Note)
++ Note getById(Integer,Integer)
++ void addTagToNoteById(Integer,Tag)
++ void removeTagFromNoteById(Integer,Tag)
++ void saveNote(Note)
++ void post(Note)
+}
+class com.mindiqo.backend.controller.PostController {
+- PostService postService
++ Result getAll()
++ Result getById(Integer)
++ Result deleteById(Integer,Integer)
++ Result getMostViewed(Integer,Integer)
++ Result getMostLiked(Integer,Integer)
++ Result getRecent(Integer,Integer)
++ Result search(Integer,Integer,String,String,String)
++ Result getTags(Integer,Integer)
+}
+interface com.mindiqo.backend.mapper.NotificationMapper {
+~ List<Notification> getUnread(Integer)
+~ List<Notification> getRead(Integer)
+~ void readANotification(Notification)
+~ void deleteById(Notification)
+~ Integer getUnreadCount(Integer)
+~ void addLikeNotification(Notification)
+~ void addCommentNotification(Notification)
+}
+interface com.mindiqo.backend.service.TagService {
+~ List<Tag> getAll()
+~ void add(Tag)
+}
+interface com.mindiqo.backend.service.PostService {
+~ List<PostNote> getAll()
+~ PostNote getById(Integer)
+~ void delete(PostNote)
+~ PageBean getMostViewed(Integer,Integer)
+~ PageBean getMostLiked(Integer,Integer)
+~ PageBean getRecent(Integer,Integer)
+~ PageBean search(Integer,Integer,String,String,String)
+~ PageBean getTags(Integer,Integer)
+}
+class com.mindiqo.backend.utils.JwtUtils {
+- {static} String signKey
+- {static} Long expire
++ {static} String generateJwt(Map<String,Object>)
++ {static} Claims parseJWT(String)
++ {static} boolean isTokenExpired(Claims)
+}
+
+
+java.io.Serializable <|.. com.mindiqo.backend.entity.PageBean
+com.mindiqo.backend.service.LikeService <|.. com.mindiqo.backend.service.impl.LikeServiceImpl
+java.io.Serializable <|.. com.mindiqo.backend.entity.Tag
+java.io.Serializable <|.. com.mindiqo.backend.entity.PostNote
+org.springframework.web.servlet.config.annotation.WebMvcConfigurer <|.. com.mindiqo.backend.config.WebConfig
+java.io.Serializable <|.. com.mindiqo.backend.entity.User
+com.mindiqo.backend.service.NotificationService <|.. com.mindiqo.backend.service.impl.NotificationServiceImpl
+com.mindiqo.backend.service.PostService <|.. com.mindiqo.backend.service.impl.PostServiceImpl
+org.springframework.web.servlet.HandlerInterceptor <|.. com.mindiqo.backend.interceptor.AuthInterceptor
+com.mindiqo.backend.service.AuthService <|.. com.mindiqo.backend.service.impl.AuthServiceImpl
+com.mindiqo.backend.service.CommentService <|.. com.mindiqo.backend.service.impl.CommentServiceImpl
+com.mindiqo.backend.service.TagService <|.. com.mindiqo.backend.service.impl.TagServiceImpl
+com.mindiqo.backend.service.NoteService <|.. com.mindiqo.backend.service.impl.NoteServiceImpl
+@enduml

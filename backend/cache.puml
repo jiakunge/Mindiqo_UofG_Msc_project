@@ -1,0 +1,18 @@
+@startuml
+participant Controller as C
+participant PostServiceImpl as PS
+participant RedisTemplate as RT
+participant PostMapper as PM
+
+C -> PS: getAll()
+PS -> RT: opsForValue().get("posts")
+alt Cache hits
+    RT --> PS: Return cachedPosts
+    PS --> C: Return cachedPosts
+else Cache misses
+    PS -> PM: getPostsOrderedByView()
+    PM --> PS: Return postNotes
+    PS -> RT: opsForValue().set("posts", postNotes, 10, TimeUnit.MINUTES)
+    PS --> C: Return postNotes
+end
+@enduml

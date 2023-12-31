@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mindiqo.backend.mapper.LikeMapper">
+
+    <insert id="add">
+        insert into like_table (user_id, post_id, create_time)
+            value (#{userId}, #{postId}, #{createTime})
+    </insert>
+    <delete id="delete">
+        delete from like_table
+        where user_id = #{userId} and post_id = #{postId}
+    </delete>
+    <select id="getLikes" resultType="java.lang.Integer">
+        select count(1) from like_table ##count(1) is the same as count(*) but faster
+        where post_id = #{postId}
+    </select>
+    <select id="getLike" resultType="com.mindiqo.backend.entity.Like">
+        select * from like_table
+        where user_id = #{userId} and post_id = #{postId}
+    </select>
+</mapper>

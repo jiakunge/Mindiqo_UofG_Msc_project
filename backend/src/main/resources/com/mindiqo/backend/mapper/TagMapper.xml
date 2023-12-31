@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mindiqo.backend.mapper.TagMapper">
+    <select id="getAll" resultType="com.mindiqo.backend.entity.Tag">
+        SELECT id, tag_name FROM tag_table ORDER BY id DESC
+    </select>
+    <select id="getByNote" parameterType="com.mindiqo.backend.entity.Note" resultType="com.mindiqo.backend.entity.Tag">
+        SELECT id, tag_name FROM tag_table WHERE id IN (SELECT tag_id FROM note_tag WHERE note_id = #{id})
+
+    </select>
+    <insert id="insert">
+        INSERT INTO tag_table (tag_name)
+        SELECT #{tagName} WHERE NOT EXISTS (
+                SELECT 1 FROM tag_table WHERE tag_name = #{tagName}
+            );
+    </insert>
+
+    <select id="getTagsByPost" resultType="com.mindiqo.backend.entity.Tag">
+        SELECT id, tag_name FROM tag_table WHERE id IN (SELECT tag_id FROM note_tag WHERE post_note_id = #{id})
+    </select>
+</mapper>
